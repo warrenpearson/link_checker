@@ -1,5 +1,5 @@
+import argparse
 import requests
-import sys
 from bs4 import BeautifulSoup
 
 
@@ -8,13 +8,13 @@ class LinkChecker:
         self._base_url = url
         self._links = set()
 
-    def check(self):
+    def check(self, verbose):
         self.find_links(self._base_url)
 
         for link in self._links:
             url = self.build_url(link)
             r = requests.get(url)
-            if r.status_code != 200:
+            if r.status_code != 200 or verbose:
                 print("{}: {}".format(url, r.status_code))
             else:
                 print(".", flush=True, end="")
@@ -76,5 +76,9 @@ class LinkChecker:
 
 
 if __name__ == "__main__":
-    site_url = sys.argv[1]
-    LinkChecker(site_url).check()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('url')
+    parser.add_argument('-v', '--verbose', default=False, action='store_true')
+    args = parser.parse_args()
+
+    LinkChecker(args.url).check(args.verbose)
